@@ -1,0 +1,121 @@
+---
+title: "Safety Data Analysis"
+author: "ABC"
+output: html_document
+---
+
+## Introduction
+
+This document provides a graphical analysis of the safety data, focusing on the trend of injuries over time, the distribution of injuries by age, and a Pareto chart of injuries by day of the week.
+
+## Data Loading and Inspection
+
+```{r}
+library(tidyverse)
+
+# Read the safety data
+safety_data <- read_csv("safety_data.csv")
+
+# Display the first few rows of the data
+head(safety_data)
+
+```
+# Trend of Injury over Time
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Aggregate by Month Start for All Injuries
+safety_data %>%
+  group_by(month_start) %>%
+  summarise(Count = n()) %>%
+  ggplot(aes(x = month_start, y = Count)) +
+  geom_col(fill = "blue", alpha = 0.7) +  # Using bars for monthly aggregation
+  geom_smooth(method = 'loess', se = FALSE, color = "red") +  # Adding smooth trend line
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +  # Whole number breaks on y-axis
+  labs(title = "Trend of All Injuries over Time by Month Start", y = "Number of Injuries")
+```
+
+```{r}
+# Aggregate by Month Start and Injury Type
+injury_data_by_month <- safety_data %>%
+  group_by(month_start, InjuryType) %>%
+  summarise(Count = n())
+
+# List of unique injury types
+injury_types <- unique(safety_data$InjuryType)
+
+# Plotting separate graphs for each injury type with trend line
+for(injury in injury_types){
+  plot_obj <- injury_data_by_month %>%
+    filter(InjuryType == injury) %>%
+    ggplot(aes(x = month_start, y = Count)) +
+    geom_col(fill = "blue", alpha = 0.7) +
+    geom_smooth(method = 'loess', se = FALSE, color = "red") + # Adding smooth trend line
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    labs(title = paste("Trend of", injury, "Injuries over Time by Month Start"), y = "Number of Injuries") +
+    theme_minimal()
+  
+  print(plot_obj)  # Explicitly print the plot object for each injury type in the loop
+}
+
+
+```
+
+
+```{r}
+# Plotting the trend of all injuries over time
+safety_data %>%
+  group_by(Date) %>%
+  summarise(Count = n()) %>%
+  ggplot(aes(x = Date, y = Count)) +
+  geom_line() +
+  labs(title = "Trend of All Injuries over Time", y = "Number of Injuries")
+  
+# Plotting the trend of injuries over time, split by Injury Type
+safety_data %>%
+  group_by(Date, InjuryType) %>%
+  summarise(Count = n()) %>%
+  ggplot(aes(x = Date, y = Count, color = InjuryType)) +
+  geom_line() +
+  labs(title = "Trend of Injuries over Time by Injury Type", y = "Number of Injuries")
+
+
+
+```
+# Histogram of All Injury by Age
+
+```{r}
+# Plotting the bar chart of all injuries by age
+safety_data %>%
+  ggplot(aes(x = Age)) +
+  geom_bar(fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram for All Injuries by Age", y = "Number of Injuries", x = "Age")
+
+```
+
+# Pareto Chart of All Injuries by Day of Week
+
+```{r}
+
+# Creating a Pareto chart of all injuries by day of the week
+injury_by_day <- safety_data %>%
+  group_by(day_of_week) %>%
+  summarise(Count = n()) %>%
+  arrange(-Count) %>%
+  mutate(Cumulative = cumsum(Count) / sum(Count))
+
+injury_by_day %>%
+  ggplot(aes(x = reorder(day_of_week, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "red") +
+  geom_line(aes(y = Cumulative * sum(Count)), group = 1, color = "blue") +
+  geom_point(aes(y = Cumulative * sum(Count)), color = "blue") +
+  labs(title = "Pareto Chart of All Injuries by Day of Week", y = "Number of Injuries", x = "Day of Week") +
+  scale_y_continuous(sec.axis = sec_axis(~./max(injury_by_day$Count), name = "Cumulative Percentage"))
+
+
+
+```

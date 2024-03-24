@@ -1,0 +1,206 @@
+---
+title: "7CS034 Assessment Data Science"
+author: ""
+date: "2023-11-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# import libraries
+library(dplyr)
+library(ggplot2)
+
+```
+
+## Dataset Details
+
+There are 27140 rows and 9 variables in it which can be seen below.
+
+```{r}
+
+# import dataset
+data <- read.csv("Data sci(dataset).csv")
+head(data) # head of the dataset
+
+str(data)
+
+```
+
+## Dataset Preprocessing
+
+Finds the missing and it is observed that multiple variable have missing data. So. these values are removed to make the dataset clean.
+
+
+```{r}
+
+#Find the missing values from the dataset with rescpt to each column
+print(colSums(is.na(data)))
+
+```
+Remove these values and clean the dataset. 
+
+
+```{r}
+
+# remove NA values and again show the values and structure of the data
+data<-na.omit(data)
+
+#Find the missing values from the dataset with rescpt to each column
+print(colSums(is.na(data)))
+              
+str(data)
+
+```
+ Convert the variables into Binary and factorization before plotting them. 
+
+
+```{r}
+
+# Convert 'Female' into a factor with labels
+data$Female <- factor(data$Female, levels = c(0, 1), labels = c("Yes", "No"))
+
+# Convert 'H8' into a factor with labels
+data$H8 <- factor(data$H8, levels = c(0, 1), labels = c("Yes", "No"))
+
+data$Mar_Stat<-as.factor(data$Mar_Stat)
+data$Eth<-as.factor(data$Eth)
+data$Highest.Ed<-as.factor(data$Highest.Ed)
+# Check the changes
+str(data)
+
+```
+## Data Visualization
+
+The provided bar graph visually represents the distribution of educational attainment among a specific cohort of individuals. The categories are "Bachelor's Degree", "Less than Secondary School", "Master's or Higher", "Secondary School", and "Some Higher Education". Based on the graphical representation, it is evident that a significant proportion of persons have achieved either a "Secondary School" or "Some HE" level of education, with these two groups exhibiting the biggest number of individuals. The group labelled as "Master's or Higher" has the lowest frequency, indicating that a smaller proportion of the population opted to pursue educational attainment above the level of a bachelor's degree.
+
+
+This observation perhaps indicates a cultural phenomenon characterised by disparities in the accessibility and perceived significance of post-secondary education. Consequently, a considerable number of individuals choose not to pursue further degrees, such as Master's or beyond.
+
+
+```{r}
+
+ggplot(data, aes(x = Highest.Ed)) +
+  geom_bar(fill = "red", color = "black") +
+  labs(x = "Highest.Ed", y = "Count", title = "Distribution of Highest level of Education") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1))
+
+```
+.
+
+The shown bar graph illustrates the relationship between the greatest level of education attained and income. There is a discernible correlation between higher levels of education, such as a Bachelor's Degree or some higher education, and higher income levels, as opposed to persons with less than a secondary school education or only a secondary school education. It is noteworthy that the category of those with a "Master's or Higher" degree does not exhibit a substantial rise in earnings when compared to those with a "Bachelor's Degree." This observation implies that obtaining further advanced education does not necessarily result in a commensurate increase in income.
+
+
+The available data indicates that there is a positive correlation between higher education attainment and income levels. However, it is observed that the magnitude of this relationship declines when individuals reach the greatest levels of education. This phenomenon may be attributed to either a saturated job market for highly educated individuals or the occurrence of diminishing returns.
+
+```{r}
+library(ggplot2)
+
+# Bar plot for the 'Highest.Ed' variable with income
+ggplot(data, aes(x = `Highest.Ed`, y = INC)) +
+  geom_col(position = "dodge", fill = "blue") + 
+  labs(x = "Highest Education Level", y = "Income") + 
+  theme_minimal() + # Clean theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # Rotate x labels for readability
+  labs(title = "Income by Highest Education Level") # Add a title
+
+```
+
+The scatter plot visually represents the variables of individuals' ages, marital status (including divorced, married, never married, separated, and widowed), and their ethnicity (including Asian, Black, Hispanic, Other, and White). The data points exhibit a dispersed distribution, indicating the presence of age variety within each marital status group across various ethnic backgrounds. Determining specific patterns is challenging due to the density of data points. However, it is evident that the "Married" status is distributed throughout all age ranges and has a substantial concentration of persons from various ethnic backgrounds.
+
+
+Marriage is a prevalent social institution that transcends many age groups and cultural origins. The investigation of the diverse distribution of age groups in marital statuses is an opportunity to gain insights into societal trends, including the mean age at initial marriage and the frequency of specific marital statuses across different age cohorts and ethnic backgrounds.
+
+```{r}
+
+# Jitter plot with 'Mar_Stat' on x-axis, 'Age' on y-axis, and point color by 'Eth'
+ggplot(data, aes(x = Mar_Stat, y = Age, color = Eth)) +
+  geom_jitter(alpha = 0.5) + # alpha for transparency to reduce overplotting
+  labs(x = "Marital Status", y = "Age", title = "Age Distribution by Marital Status and Ethnicity") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x labels for readability
+
+
+```
+
+The boxplot illustrates the dispersion of ages among various marital status groups, differentiating between females (Yes) and non-females (No).
+In the categories of "Divorced," "Married," and "Widowed," it appears that the median age of females is comparatively greater than that of those who do not identify as female.
+The age distributions of ladies and non-females in the "Never Married" and "Separated" categories exhibit similarities.
+The category labelled as "Widowed" demonstrates the highest median age, which aligns with the common understanding that widowhood tends to occur during the later stages of one's life.
+The "Married" group exhibits a notable dispersion of ages, while the female "Never Married" category displays a somewhat lower number of extreme values.
+
+
+```{r}
+
+
+# Box plot for Age by Marital Status, colored by Female
+ggplot(data, aes(x = Mar_Stat, y = Age, fill = Female)) +
+  geom_boxplot() +
+  labs(x = "Marital Status", y = "Age", fill = "Female", title = "Age by Marital Status and Gender") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+
+The shown bar chart depicts the mean income of individuals belonging to various educational backgrounds, further categorised by gender (Female "Yes" and Female "No").
+Across all educational categories, women tend to have lower average wages compared to their male counterparts.
+There is a significant discrepancy in income that is particularly obvious among persons who have attained a "Master's or higher" level of education.
+Individuals who possess a "Bachelor's Degree" and those who have attained a "Master's Degree or higher" exhibit higher average wages, suggesting a positive correlation between higher educational attainment and income levels.
+
+```{r}
+library(ggplot2)
+
+# Bar plot of average income by highest education level, filled by female
+ggplot(data, aes(x = `Highest.Ed`, y = INC, fill = Female)) +
+  stat_summary(fun = mean, geom = "col", position = position_dodge()) +
+  labs(x = "Highest Education Level", y = "Average Income", fill = "Female", 
+       title = "Average Income by Education Level and Gender") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+```
+
+The provided graphic illustrates the mean income levels among various ethnic groups, differentiating between persons who identify as female (Yes) and those who do not (No).
+In line with the preceding graphic, it can be observed that females belonging to various ethnic groups exhibit lower mean wages in comparison to their non-female counterparts.
+The category labelled as "Hispanic" has the most minimal disparity in income between genders, whilst the category labelled as "White" demonstrates the most substantial discrepancy.
+Within the non-female population, persons who identify as "Asian" and "White" exhibit the most elevated mean incomes.
+
+
+```{r}
+
+library(ggplot2)
+library(RColorBrewer)
+
+# Define a more vibrant color palette
+my_colors <- brewer.pal(n = 3, name = "Set1")
+
+# Bar plot of average income by ethnicity, filled by female with vibrant colors
+ggplot(data, aes(x = Eth, y = INC, fill = Female)) +
+  stat_summary(fun.y = mean, geom = "col", position = position_dodge()) +
+  scale_fill_manual(values = my_colors) + # Use the vibrant color palette
+  labs(x = "Ethnicity", y = "Average Income", fill = "Feamle",
+       title = "Average Income by Ethnicity and Gender") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5, size = 20, face = "bold"), # Center the title and make it bold
+        axis.title = element_text(size = 14), # Increase the size of axis titles
+        legend.title = element_text(size = 14), # Increase the size of legend title
+        legend.text = element_text(size = 12)) + # Increase the size of legend text
+  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) # Adjust legend position
+
+
+```
+
+
+
+
+
